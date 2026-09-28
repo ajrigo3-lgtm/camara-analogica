@@ -1131,3 +1131,26 @@ html, body {
 .film-negative-img.positive-mode {
   filter: none;
 }
+/* G. LOMOGRAPHY DIANA F+ (Plástico retro turquesa y negro con viñeteo extremo) */
+.theme-lomo-diana .metal-machined {
+  background: linear-gradient(to bottom, #1fa2a6 0%, #157376 60%, #0d4a4c 100%);
+  border-bottom: 3px solid #083031;
+}
+
+.theme-lomo-diana .leather-wrap {
+  background-color: #111111;
+  background-image: radial-gradient(#222 20%, transparent 20%);
+  background-size: 8px 8px;
+}
+
+.theme-lomo-diana .engraved-brand {
+  font-family: "Impact", "Arial Black", sans-serif;
+  letter-spacing: 2px;
+  color: #ffde00;
+  text-shadow: 2px 2px 0px #000;
+}
+
+.theme-lomo-diana #viewfinder-gl-surface {
+  border-radius: 50%; /* Visor circular característico */
+  transform: scale(0.92);
+}
