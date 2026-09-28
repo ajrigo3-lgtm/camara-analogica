@@ -274,19 +274,22 @@
     </div>
   </dialog>
 
-  <!-- MODAL: CATÁLOGO DE CARRETES Y EMULSIONES -->
+  <!-- MODAL: CATÁLOGO DE CARRETES Y EMULSIONES (DINÁMICO POR CÁMARA) -->
   <dialog id="modal-film-catalog" class="vintage-dialog">
     <div class="dialog-shell">
       <div class="dialog-metal-header">
-        <h3>BANCO DE EMULSIONES & CARRETES</h3>
+        <h3 id="film-modal-title">CARRETES COMPATIBLES</h3>
         <button class="btn-close-plate" id="btn-close-film-catalog">✕</button>
       </div>
 
       <div class="film-catalog-warning">
-        <span>⚠ ATENCIÓN: Si cambias de carrete sin haberlo terminado y revelado, el rollo actual quedará velado y expuesto a la luz.</span>
+        <span id="film-warning-text">Aviso: Cambiar de carrete antes de terminarlo expulsará los disparos no revelados.</span>
       </div>
 
-      <div class="film-canister-scroller">
+      <!-- Este contenedor se rellena automáticamente por JavaScript según la cámara en uso -->
+      <div class="film-canister-scroller" id="dynamic-film-container"></div>
+    </div>
+  </dialog>
         
         <!-- Kodak Portra 400 -->
         <div class="film-pack-card active-film-item" data-film-profile="kodak_portra_400">
