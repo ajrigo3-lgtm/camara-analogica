@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es" class="no-select">
+<head>
+  <meta charset="UTF-8">
+  <!-- Configuración de pantalla completa, notch y bloqueo estricto de zoom en móviles -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AnalogVault">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#121212">
+  <meta name="format-detection" content="telephone=no">
+
+  <title>Analog Vault — Heritage Mechanical Camera & Darkroom</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-leica-m" id="camera-runtime">
+
+  <!-- =================================================================== -->
+  <!-- 1. CHASIS PRINCIPAL DE LA CÁMARA (VISTA FRONTAL / VISOR DE DISPARO) -->
+  <!-- =================================================================== -->
+  <div id="camera-housing" class="housing-container">
+
+    <!-- ----------------------------------------------------------------- -->
+    <!-- TORRETA SUPERIOR METÁLICA (MECANISMO DE CONTROL)                 -->
+    <!-- ----------------------------------------------------------------- -->
+    <header id="top-plate" class="metal-machined">
+      
+      <!-- Sector Izquierdo: Rebobinado y Selector de Sistema -->
+      <div class="deck-group deck-left">
+        <!-- Manivela de rebobinado / Botón de cambio de chasis de cámara -->
+        <div class="crank-assembly" id="assembly-crank">
+          <button id="btn-camera-system" class="knurled-crank" aria-label="Cambiar cuerpo de cámara">
+            <div class="crank-lever-arm"></div>
+            <div class="crank-axle"></div>
+          </button>
+          <span class="mechanical-label">CORPS</span>
+        </div>
+
+        <!-- Serigrafía y grabado original de manufactura -->
+        <div class="hallmark-block">
+          <span class="engraved-brand" id="label-camera-brand">LEITZ</span>
+          <span class="engraved-model" id="label-camera-model">M3 · WETZLAR GERMANY</span>
+        </div>
+      </div>
+
+      <!-- Sector Derecho: Obturación, Contador y Palanca de Carga -->
+      <div class="deck-group deck-right">
+        
+        <!-- Dial moleteado de velocidades de obturación -->
+        <div class="dial-assembly" id="assembly-shutter-speed">
+          <div id="shutter-speed-knob" class="machined-dial" tabindex="0" role="slider" aria-label="Velocidad de obturación">
+            <span class="dial-indicator-mark"></span>
+            <div class="dial-readout" id="readout-shutter-speed">1/250</div>
+          </div>
+          <span class="mechanical-label">SPEED</span>
+        </div>
+
+        <!-- Contador mecánico aditivo de fotogramas con lente de lupa -->
+        <div class="counter-assembly" id="assembly-frame-counter">
+          <div class="magnifying-bubble">
+            <div class="counter-disk" id="mechanical-counter-disk">
+              <span id="counter-value">S</span>
+            </div>
+          </div>
+          <span class="mechanical-label">EXP</span>
+        </div>
+
+        <!-- Palanca física de arrastre de película (Avance de fotograma) -->
+        <div class="advance-lever-assembly" id="assembly-advance-lever">
+          <div id="film-advance-lever" class="advance-arm lever-unwound" title="Arrastrar película para armar obturador">
+            <div class="lever-pivot"></div>
+            <div class="lever-arm-body"></div>
+            <div class="lever-plastic-tip"></div>
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- ----------------------------------------------------------------- -->
+    <!-- CUERPO CENTRAL: VISORES ÓPTICOS Y BAHÍA DE EYECCIÓN              -->
+    <!-- ----------------------------------------------------------------- -->
+    <main id="optical-deck" class="leather-wrap">
+
+      <!-- Ranura motorizada de eyección de película instantánea (Modo Instax) -->
+      <div id="instax-ejection-slot" class="ejection-slot-hidden">
+        <div id="instax-film-sheet" class="film-sheet-blank">
+          <div class="chemical-pod-bulge"></div>
+          <div class="instant-frame-border">
+            <div class="emulsion-window">
+              <canvas id="instant-latent-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BAHÍA DEL VISOR ÓPTICO -->
+      <div id="viewfinder-portal" class="viewfinder-aperture">
+        
+        <!-- Pipeline de captura: Sensor bruto y Renderizador WebGL -->
+        <video id="webcam-sensor-feed" autoplay playsinline muted class="raw-feed-hidden"></video>
+        <canvas id="viewfinder-gl-surface"></canvas>
+
+        <!-- CAPA DE RETÍCULAS ÓPTICAS SEGÚN MODELO DE CÁMARA -->
+        <div id="reticle-stage" class="reticle-stage-rangefinder">
+          
+          <!-- Elementos específicos de Telemétrica (Leica M) -->
+          <div id="rangefinder-overlay" class="optical-mask">
+            <div class="frameline-box frameline-50mm"></div>
+            <div class="frameline-box frameline-35mm"></div>
+            <div class="parallax-correction-marks"></div>
+            <div id="rangefinder-split-field" class="split-patch-mirror">
+              <!-- Imagen fantasma desfasada para enfocar por coincidencia -->
+              <canvas id="split-patch-canvas"></canvas>
+            </div>
+          </div>
+
+          <!-- Elementos de Medio Formato de Cintura (Hasselblad 6x6) -->
+          <div id="waist-level-overlay" class="optical-mask optical-mask-hidden">
+            <div class="ground-glass-texture"></div>
+            <div class="square-mask-6x6"></div>
+            <div class="ground-glass-crosshair"></div>
+            <div class="magnifier-lens-ring"></div>
+          </div>
+
+          <!-- Elementos de Instantánea / Visor directo (Instax) -->
+          <div id="instant-view-overlay" class="optical-mask optical-mask-hidden">
+            <div class="instax-crop-frame"></div>
+            <div class="target-circle-spot"></div>
+          </div>
+
+          <!-- Elementos de Placas / Cianotipia (Cámara Oscura de Fuelle) -->
+          <div id="cyanotype-overlay" class="optical-mask optical-mask-hidden">
+            <div class="ferrotype-vignette"></div>
+            <div class="cyanotype-paper-grain"></div>
+          </div>
+
+          <!-- Fotómetro clásico: Aguja galvanométrica o LEDs de exposición (+ o -) -->
+          <div id="light-meter-cluster" class="meter-readout">
+            <span class="meter-led led-underexposed" id="led-minus">-</span>
+            <span class="meter-led led-matched" id="led-match">●</span>
+            <span class="meter-led led-overexposed" id="led-plus">+</span>
+          </div>
+
+        </div>
+
+        <!-- Cristal óptico con reflejos antirreflejantes de lente (Lens Flare / Coated Glass) -->
+        <div class="lens-glass-reflection"></div>
+      </div>
+
+    </main>
+
+    <!-- ----------------------------------------------------------------- -->
+    <!-- PLACA INFERIOR (DISPARADOR, CARRETE Y CONTROL DE EMULSIÓN)       -->
+    <!-- ----------------------------------------------------------------- -->
+    <footer id="bottom-plate" class="metal-machined">
+
+      <!-- Recordatorio de carrete cargado (Memo Clip trasero / Pestaña de caja) -->
+      <div class="memo-clip-module">
+        <button id="btn-open-film-drawer" class="memo-clip-pocket" aria-label="Abrir selector de carrete">
+          <div class="film-tab-cartridge" id="active-cartridge-tab">
+            <div class="film-tab-header" id="film-tab-brand">KODAK</div>
+            <div class="film-tab-body" id="film-tab-name">PORTRA 400</div>
+            <div class="film-tab-footer" id="film-tab-iso">ISO 400 · 36 EXP</div>
+          </div>
+        </button>
+        <span class="mechanical-label">EMULSIÓN</span>
+      </div>
+
+      <!-- Botón disparador mecánico con rosca para cable disparador -->
+      <div class="shutter-well-module">
+        <button id="shutter-trigger" class="mechanical-shutter-button" aria-label="Disparar obturador">
+          <div class="shutter-collar">
+            <div class="cable-release-thread"></div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Acceso de seguridad al Laboratorio Químico / Cuarto Oscuro -->
+      <div class="darkroom-access-module">
+        <button id="btn-enter-darkroom" class="darkroom-vault-switch" aria-label="Entrar al cuarto oscuro de revelado">
+          <div class="safelight-pilot-led" id="darkroom-alert-led"></div>
+          <span class="switch-title">LABORATORIO</span>
+        </button>
+        <span class="mechanical-label" id="lab-roll-status">CARRETE EN USO</span>
+      </div>
+
+    </footer>
+
+    <!-- Ventana de inspección trasera para control de arrastre del film -->
+    <div id="chassis-inspection-back">
+      <div class="film-pressure-plate-indicator">
+        <span class="film-sprocket-counter" id="film-sprocket-info">ROL: CARGADO · HALUROS ACTIVOS</span>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- =================================================================== -->
+  <!-- 2. DIÁLOGOS DE SELECCIÓN DE HARDWARE (MODALES ESQUEMOMÓRFICOS)      -->
+  <!-- =================================================================== -->
+
+  <!-- MODAL: CUERPOS DE CÁMARA HISTÓRICOS -->
+  <dialog id="modal-camera-catalog" class="vintage-dialog">
+    <div class="dialog-shell">
+      <div class="dialog-metal-header">
+        <h3>SELECCIÓN DE CUERPO HISTÓRICO</h3>
+        <button class="btn-close-plate" id="btn-close-camera-catalog">✕</button>
+      </div>
+      
+      <div class="gear-card-scroller">
+        
+        <!-- Leica M3 -->
+        <article class="camera-card active-card" data-camera-system="leica_m3">
+          <div class="camera-card-blueprint leica-blueprint"></div>
+          <div class="camera-card-info">
+            <h4>Leica M3 (1954)</h4>
+            <div class="spec-pills">
+              <span>35mm</span>
+              <span>Telémetro</span>
+              <span>Ratio 3:2</span>
+            </div>
+            <p>Precisión mecánica alemana. Visor con marcos luminosos combinados y doble imagen de coincidencia de alta claridad.</p>
+          </div>
+        </article>
+
+        <!-- Hasselblad 500 C/M -->
+        <article class="camera-card" data-camera-system="hasselblad_500">
+          <div class="camera-card-blueprint hasselblad-blueprint"></div>
+          <div class="camera-card-info">
+            <h4>Hasselblad 500 C/M (1957)</h4>
+            <div class="spec-pills">
+              <span>Medio Formato</span>
+              <span>Visor de Cintura</span>
+              <span>Ratio 1:1</span>
+            </div>
+            <p>Cámara réflex de formato medio con negativo cuadrado de 6x6. Visor esmerilado de imagen invertida y obturador central en lente.</p>
+          </div>
+        </article>
+
+        <!-- Fujifilm Instax / Polaroid -->
+        <article class="camera-card" data-camera-system="instax_retro">
+          <div class="camera-card-blueprint instax-blueprint"></div>
+          <div class="camera-card-info">
+            <h4>Instant Box 100</h4>
+            <div class="spec-pills">
+              <span>Instantánea</span>
+              <span>Eyección Motor</span>
+              <span>Ratio 3:4</span>
+            </div>
+            <p>Cámara química de difusión instantánea. La copia se expulsa físicamente y se revela a la vista de manera gradual.</p>
+          </div>
+        </article>
+
+        <!-- Cianotipia / Cámara de Cajón Siglo XIX -->
+        <article class="camera-card" data-camera-system="cyanotype_box">
+          <div class="camera-card-blueprint cyanotype-blueprint"></div>
+          <div class="camera-card-info">
+            <h4>Cámara de Cajón John Herschel (1842)</h4>
+            <div class="spec-pills">
+              <span>Placas de Fuelle</span>
+              <span>Proceso Férrico</span>
+              <span>Ratio 4:5</span>
+            </div>
+            <p>Técnica fotográfica histórica basada en sales de hierro. Proporciona imágenes directas en monocromo azul de Prusia profundo.</p>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </dialog>
+
+  <!-- MODAL: CATÁLOGO DE CARRETES Y EMULSIONES -->
+  <dialog id="modal-film-catalog" class="vintage-dialog">
+    <div class="dialog-shell">
+      <div class="dialog-metal-header">
+        <h3>BANCO DE EMULSIONES & CARRETES</h3>
+        <button class="btn-close-plate" id="btn-close-film-catalog">✕</button>
+      </div>
+
+      <div class="film-catalog-warning">
+        <span>⚠ ATENCIÓN: Si cambias de carrete sin haberlo terminado y revelado, el rollo actual quedará velado y expuesto a la luz.</span>
+      </div>
+
+      <div class="film-canister-scroller">
+        
+        <!-- Kodak Portra 400 -->
+        <div class="film-pack-card active-film-item" data-film-profile="kodak_portra_400">
+          <div class="film-cartridge-visual canister-portra">
+            <span class="canister-ridge"></span>
+          </div>
+          <div class="film-details">
+            <div class="film-title">Kodak Professional Portra 400</div>
+            <div class="film-badge-row">
+              <span class="badge">Color Negativo</span>
+              <span class="badge">ISO 400</span>
+              <span class="badge">36 Disparos</span>
+            </div>
+            <p class="film-desc">Micrograno optimizado, calidez inconfundible en tonos piel y altísima latitud de exposición.</p>
+          </div>
+        </div>
+
+        <!-- Kodak Tri-X 400 -->
+        <div class="film-pack-card" data-film-profile="kodak_tri_x">
+          <div class="film-cartridge-visual canister-trix">
+            <span class="canister-ridge"></span>
+          </div>
+          <div class="film-details">
+            <div class="film-title">Kodak Tri-X 400</div>
+            <div class="film-badge-row">
+              <span class="badge">Blanco y Negro</span>
+              <span class="badge">ISO 400</span>
+              <span class="badge">36 Disparos</span>
+            </div>
+            <p class="film-desc">El negativo periodístico y documental por excelencia. Grano clásico marcado, sombras densas y gran contraste.</p>
+          </div>
+        </div>
+
+        <!-- Fujichrome Velvia 50 -->
+        <div class="film-pack-card" data-film-profile="fuji_velvia_50">
+          <div class="film-cartridge-visual canister-velvia">
+            <span class="canister-ridge"></span>
+          </div>
+          <div class="film-details">
+            <div class="film-title">Fujichrome Velvia 50</div>
+            <div class="film-badge-row">
+              <span class="badge">Diapositiva (E-6)</span>
+              <span class="badge">ISO 50</span>
+              <span class="badge">36 Disparos</span>
+            </div>
+            <p class="film-desc">Emulsión reversible de extrema saturación de color, grano ultrafino y negros puros para paisaje.</p>
+          </div>
+        </div>
+
+        <!-- Instant Color Pack -->
+        <div class="film-pack-card" data-film-profile="instax_color">
+          <div class="film-cartridge-visual cartridge-instax">
+            <span class="canister-ridge"></span>
+          </div>
+          <div class="film-details">
+            <div class="film-title">Instant Color Film Pack</div>
+            <div class="film-badge-row">
+              <span class="badge">Instantáneo</span>
+              <span class="badge">ISO 800</span>
+              <span class="badge">10 Disparos</span>
+            </div>
+            <p class="film-desc">Carga sellada al vacío de revelado químico integral por presión de rodillos mecánicos con marco blanco.</p>
+          </div>
+        </div>
+
+        <!-- Cianotipia Clásica -->
+        <div class="film-pack-card" data-film-profile="cyanotype_iron">
+          <div class="film-cartridge-visual canister-cyanotype">
+            <span class="canister-ridge"></span>
+          </div>
+          <div class="film-details">
+            <div class="film-title">Cianotipia sobre Papel de Algodón</div>
+            <div class="film-badge-row">
+              <span class="badge">Proceso Histórico</span>
+              <span class="badge">ISO 12</span>
+              <span class="badge">12 Disparos</span>
+            </div>
+            <p class="film-desc">Emulsión artesanal al ferricianuro potásico y citrato férrico amónico. Tonalidades monocromas azul Prusia.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </dialog>
+
+
+  <!-- =================================================================== -->
+  <!-- 3. LABORATORIO DE REVELADO QUÍMICO / CUARTO OSCURO                 -->
+  <!-- =================================================================== -->
+  <section id="darkroom-vault" class="darkroom-screen darkroom-hidden">
+    
+    <!-- Filtro ambiental de luz inactínica roja (Safelight Lamp) -->
+    <div class="red-safelight-glow"></div>
+
+    <header class="darkroom-top-bar">
+      <div class="lab-signboard">
+        <h2 class="lab-title">CUARTO OSCURO · LABORATORIO QUÍMICO</h2>
+        <span class="lab-subtitle" id="darkroom-status-readout">LISTO PARA EL PROCESO HÚMEDO</span>
+      </div>
+      <button id="btn-return-camera" class="btn-metal-action" aria-label="Volver a la cámara">VOLVER AL VISOR</button>
+    </header>
+
+    <!-- ZONA ACTIVA DEL LABORATORIO -->
+    <div class="darkroom-workspace">
+      
+      <!-- SUBZONA A: BANDEJAS QUÍMICAS DE INMERSIÓN (REVELADO CIEGO) -->
+      <div id="chemical-processing-bay" class="processing-bay-hidden">
+        
+        <div class="processing-tanks-container">
+          <!-- Cubeta 1: Revelador -->
+          <div class="lab-tray tray-developer" id="tray-dev">
+            <div class="liquid-surface dev-liquid"></div>
+            <div class="tray-spec-plate">
+              <span class="tray-num">01</span>
+              <span class="tray-chemical">REVELADOR (D-76 / C-41)</span>
+              <span class="tray-time">TIEMPO: 08:30 min</span>
+            </div>
+          </div>
+
+          <!-- Cubeta 2: Baño de Paro -->
+          <div class="lab-tray tray-stop" id="tray-stop">
+            <div class="liquid-surface stop-liquid"></div>
+            <div class="tray-spec-plate">
+              <span class="tray-num">02</span>
+              <span class="tray-chemical">BAÑO DE PARO ÁCIDO</span>
+              <span class="tray-time">TIEMPO: 01:00 min</span>
+            </div>
+          </div>
+
+          <!-- Cubeta 3: Fijador -->
+          <div class="lab-tray tray-fixer" id="tray-fixer">
+            <div class="liquid-surface fix-liquid"></div>
+            <div class="tray-spec-plate">
+              <span class="tray-num">03</span>
+              <span class="tray-chemical">FIJADOR RÁPIDO DE SALES</span>
+              <span class="tray-time">TIEMPO: 05:00 min</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Temporizador y control de agitación de cubeta -->
+        <div class="chemical-console">
+          <div class="clock-housing">
+            <span id="darkroom-clock">00:00</span>
+          </div>
+          <div class="process-instructions" id="chemical-step-instruction">
+            Sumerge la espiral en el revelador para reducir los haluros de plata expuestos a plata metálica.
+          </div>
+          <button id="btn-trigger-development" class="btn-chemical-start">INICIAR REVELADO DEL CARRETE</button>
+        </div>
+
+      </div>
+
+      <!-- SUBZONA B: MESA DE LUZ & HOJA DE CONTACTOS (NEGATIVOS REVELADOS) -->
+      <div id="lightbox-inspection-bay" class="lightbox-bay-hidden">
+        
+        <div class="lightbox-toolbar">
+          <h3>MESA DE LUZ & HOJA DE CONTACTOS</h3>
+          <div class="lightbox-actions">
+            <button id="btn-export-roll-strip" class="btn-lab-tool">EXPORTAR TIRA COMPLETA</button>
+            <button id="btn-new-roll-prep" class="btn-lab-tool highlight-tool">CARGAR NUEVO ROLLO</button>
+          </div>
+        </div>
+
+        <!-- Panel retroiluminado blanco de 5000K -->
+        <div class="lightbox-surface" id="lightbox-illuminated-area">
+          <div class="film-negative-strip-row" id="lightbox-contact-sheet">
+            <!-- Los fotogramas revelados (con perforaciones y código DX de emulsión) se inyectan aquí -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- =================================================================== -->
+  <!-- 4. DIÁLOGO MODAL: AMPLIADORA Y POSITIVADO DE FOTOGRAMA INDIVIDUAL    -->
+  <!-- =================================================================== -->
+  <dialog id="modal-enlarger-preview" class="vintage-dialog">
+    <div class="enlarger-frame">
+      <div class="enlarger-header">
+        <span id="enlarger-frame-title">FOTOGRAMA 14 · KODAK PORTRA 400</span>
+        <button id="btn-close-enlarger" class="btn-close-plate">✕</button>
+      </div>
+      <div class="enlarger-paper-easel">
+        <img id="enlarger-image-target" alt="Ampliación positiva de negativo">
+      </div>
+      <div class="enlarger-footer">
+        <a id="btn-download-highres" class="btn-metal-action" download="analog_photo.jpg">GUARDAR COPIA EN ALTA RESOLUCIÓN</a>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Lienzo oculto de alta resolución para renderizado final de shaders sin pérdida -->
+  <canvas id="highres-render-buffer" class="raw-feed-hidden"></canvas>
+
+  <script src="app.js"></script>
+</body>
+</html>
