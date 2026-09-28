@@ -1,0 +1,74 @@
+{
+  "name": "Analog Vault — Heritage Camera Engine",
+  "short_name": "AnalogVault",
+  "description": "Simulador fotográfico analógico hiperrealista: cuerpos históricos, emulsiones de haluros y revelado en cuarto oscuro.",
+  "id": "/?source=pwa",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["fullscreen", "standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "dir": "ltr",
+  "lang": "es-ES",
+  "background_color": "#0d0d0d",
+  "theme_color": "#1a1a1a",
+  "categories": ["photo", "utilities", "entertainment"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=192&auto=format&fit=crop&q=80",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=512&auto=format&fit=crop&q=80",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=512&auto=format&fit=crop&q=80",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Cuarto Oscuro / Laboratorio",
+      "short_name": "Laboratorio",
+      "description": "Entrar al laboratorio químico para inspeccionar y revelar rollos",
+      "url": "./index.html?mode=darkroom",
+      "icons": [
+        {
+          "src": "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=96&auto=format&fit=crop&q=80",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Disparo Rápido 35mm",
+      "short_name": "Leica M",
+      "description": "Abrir directamente el visor telemétrico",
+      "url": "./index.html?camera=leica_m3",
+      "icons": [
+        {
+          "src": "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=96&auto=format&fit=crop&q=80",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=1080&auto=format&fit=crop&q=80",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Visor telemétrico con líneas de encuadre y grano de haluros"
+    }
+  ]
+}
